@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My F&O Trading Journal</title>
+    <style>
+        body { font-family: Arial; text-align:center; margin:20px; }
+        table { margin:auto; border-collapse: collapse; width:80%; }
+        th, td { border:1px solid black; padding:8px; }
+        .profit { color:green; font-weight:bold; }
+        .loss { color:red; font-weight:bold; }
+        button { padding:8px 15px; margin-top:10px; }
+    </style>
+</head>
+<body>
+
+<h1>📈 F&O Trading Journal</h1>
+
+<input type="date" id="date"><br><br>
+
+<select id="type">
+    <option>Call</option>
+    <option>Put</option>
+</select><br><br>
+
+<input type="number" id="pl" placeholder="Profit or Loss Amount"><br><br>
+
+<button onclick="addTrade()">Save Trade</button>
+
+<h2>Monthly Net P&L: ₹ <span id="monthlyTotal">0</span></h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>P&L</th>
+        </tr>
+    </thead>
+    <tbody id="tradeTable"></tbody>
+</table>
+
+<script>
+let trades = JSON.parse(localStorage.getItem("trades")) || [];
+
+function addTrade(){
+    let date = document.getElementById("date").value;
+    let type = document.getElementById("type").value;
+    let pl = parseFloat(document.getElementById("pl").value);
+
+    if(!date || isNaN(pl)){
+        alert("Enter proper details");
+        return;
+    }
+
+    trades.push({date,type,pl});
+    localStorage.setItem("trades", JSON.stringify(trades));
+    displayTrades();
+}
+
+function displayTrades(){
+    let table = document.getElementById("tradeTable");
+    table.innerHTML = "";
+    let monthlyTotal = 0;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    trades.forEach(trade => {
+        let tradeDate = new Date(trade.date);
+        if(tradeDate.getMonth() === currentMonth && tradeDate.getFullYear() === currentYear){
+            monthlyTotal += trade.pl;
+        }
+
+        let row = `<tr>
+            <td>${trade.date}</td>
+            <td>${trade.type}</td>
+            <td class="${trade.pl >= 0 ? 'profit':'loss'}">₹ ${trade.pl}</td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+
+    document.getElementById("monthlyTotal").innerText = monthlyTotal;
+}
+
+displayTrades();
+</script>
+
+</body>
+</html>
